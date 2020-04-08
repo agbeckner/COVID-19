@@ -1,0 +1,64 @@
+---
+title: "Interactive COVID-19 Map"
+runtime: shiny
+output: html_document
+css: style.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+if (!require("pacman")) install.packages("pacman")
+if (!require("rspatial")) devtools::install_github('rspatial/rspatial')
+pacman::p_load("tidyverse","caret","dplyr","ggmap","pacman","matrixStats","maps","sf","sp","ggiraph","rspatial","magrittr","highcharter","widgetframe","shinydashboard","shiny","rsconnect")
+```
+
+```{r include = FALSE}
+setwd("~/csse_covid_19_data/csse_covid_19_daily_reports/")
+
+# list of files
+myfiles <- list.files(getwd(), pattern = ".csv")
+
+# grab most recent file
+current_date <- tail(myfiles, n=1)
+
+# find the index of that file
+index = which(myfiles == current_date)
+
+# index into the list to only read in most recent data
+mydata <- read.csv(myfiles[index], sep = ",", header = T, skipNul = F)
+
+# function
+substrLeft <- function(string,char){
+  substr(string,1,char)
+}
+
+COVID <- mydata %>%
+  filter(str_detect(Province_State,"California")) %>%
+  mutate(Last_Update = substrLeft(Last_Update,10),
+         Date = as.Date(Last_Update)) %>%
+  select(Admin2, Date,Confirmed, Deaths, Recovered) %>%
+  rename(subregion = Admin2)
+
+covid_by_region_summary <- COVID %>%
+  select(subregion,Confirmed) %>%
+  rename(code = subregion)
+
+plot <- hcmap("countries/us/us-ca-all", data = covid_by_region_summary, value="Confirmed",
+              joinBy = c("name", "code"), name = "Confirmed COVID-19",
+              dataLabels = list(enabled = TRUE, format = '{Confirmed}'),
+              borderColor = "black", borderWidth = 0.1,
+              tooltip = list(valueDecimals = 0, valuePrefix = "", valueSuffix = " Cases")) %>%
+  hc_title(text = "COVID-19 in California") 
+plot
+
+shiny_new <- dashboardPage(
+  dashboardHeader(title = ""),
+  dashboardSidebar(),
+  dashboardBody(fillPage(plot)
+  )
+)
+
+shinyApp(shiny_new, server)
+```
+
