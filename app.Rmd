@@ -16,13 +16,11 @@ pacman::p_load("tidyverse","caret","dplyr","ggmap","pacman","matrixStats","maps"
 ```{r include = FALSE}
 file_date <- format(Sys.Date(), format="%m-%d-%Y")
 current_file <- paste(file_date,".csv", sep ="")
-location <- "csse_covid_19_data/csse_covid_19_daily_reports/"
+location <- "data/"
 info <-  paste(location,current_file,sep ="")
-mydata <- read.csv("~/csse_covid_19_data/csse_covid_19_daily_reports/04-07-2020.csv")
-
 
 # index into the list to only read in most recent data
-mydata <- read.csv(info)
+mydata <- read.csv(current_file)
 
 # function
 substrLeft <- function(string,char){
@@ -46,7 +44,6 @@ plot <- hcmap("countries/us/us-ca-all", data = covid_by_region_summary, value="C
               borderColor = "black", borderWidth = 0.1,
               tooltip = list(valueDecimals = 0, valuePrefix = "", valueSuffix = " Cases")) %>%
   hc_title(text = "COVID-19 in California") 
-plot
 
 shiny_new <- dashboardPage(
   dashboardHeader(title = ""),
@@ -55,11 +52,10 @@ shiny_new <- dashboardPage(
   )
 )
 
-shinyApp(shiny_new, server)
+server <- function(input, output, session) {
+}
 
-rsconnect::setAccountInfo(name='aaronbeckner',
-			  token='ED1D931B297BBF4AB8E44728F0F258BF',
-			  secret='DLPyaxEmAga7i7heRXiudVc0hAIKROLWatgEaj3z')
+shinyApp(shiny_new, server)
 
 ```
 
