@@ -56,5 +56,10 @@ shiny_new <- dashboardPage(
 )
 
 shinyApp(shiny_new, server)
+
+rsconnect::setAccountInfo(name='aaronbeckner',
+			  token='ED1D931B297BBF4AB8E44728F0F258BF',
+			  secret='DLPyaxEmAga7i7heRXiudVc0hAIKROLWatgEaj3z')
+
 ```
 
